@@ -1,0 +1,73 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.asjy.dao.OrderMapper">
+    <insert id="addOrder" parameterType="Order">
+     <selectKey resultType="Integer" keyProperty="oId" keyColumn="o_id" order="AFTER">
+         select LAST_INSERT_ID()
+     </selectKey>
+      insert into `order` values(default,#{total},#{orderTime},#{state},#{name},#{phone},#{addr},#{uId})
+    </insert>
+
+    <insert id="addOrderItem" parameterType="OrderItem">
+        insert into order_item values(default,#{count},#{subTotal},#{pId},#{oId})
+    </insert>
+
+    <update id="changeState" parameterType="Integer">
+        update `order` set state=#{state} where o_id=#{oId}
+    </update>
+
+    <resultMap id="orderMap" type="OrderExt">
+        <id property="oId" column="o_id"></id>
+        <result property="total" column="total"></result>
+        <result property="orderTime" column="order_time"></result>
+        <result property="state" column="state"></result>
+        <result property="name" column="name"></result>
+        <result property="phone" column="phone"></result>
+        <result property="addr" column="addr"></result>
+        <result property="uId" column="u_id"></result>
+        <collection property="orderItemExtList" ofType="OrderItemExt">
+            <id property="itemId" column="item_id"></id>
+            <result property="count" column="count"></result>
+            <result property="subTotal" column="sub_total"></result>
+            <result property="pId" column="p_id"></result>
+            <result property="oId" column="o_id"></result>
+            <association property="product" javaType="Product">
+                <id property="pId" column="p_id"></id>
+                <result property="pName" column="p_name"></result>
+                <result property="marketPrice" column="market_price"></result>
+                <result property="shopPrice" column="shop_price"></result>
+                <result property="image" column="image"></result>
+                <result property="pDesc" column="p_desc"></result>
+                <result property="isHot" column="is_hot"></result>
+                <result property="pDate" column="p_date"></result>
+                <result property="csId" column="cs_id"></result>
+            </association>
+        </collection>
+    </resultMap>
+    <select id="getOrderDetail" parameterType="Order" resultMap="orderMap">
+             select * from `order` left join order_item
+             on `order`.o_id = order_item.o_id
+             left join product
+             on order_item.p_id=product.p_id
+             where `order`.o_id = #{oId}
+    </select>
+
+    <select id="getOrderByUserId" parameterType="OrderForPageBean" resultMap="orderMap">
+         select * from (select * from `order` where u_id=#{uId} and state!=-1 limit #{start},#{pageSize}) as `order` left join order_item
+             on `order`.o_id = order_item.o_id
+             left join product
+             on order_item.p_id=product.p_id
+    </select>
+
+    <select id="getRowCount" parameterType="OrderForPageBean" resultType="Integer">
+         select count(*) from `order` where u_id=#{uId} and state!=-1
+    </select>
+
+    <select id="getOrderNumBystate"  resultType="Integer">
+         select count(*) from `order` where u_id=#{uId} and state=#{state}
+    </select>
+
+
+
+
+</mapper>

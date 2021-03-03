@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.asjy.dao.UserMapper">
+    <select id="findAllUser" resultType="User">
+        select * from user
+    </select>
+
+    <select id="checkUserName" parameterType="String" resultType="Integer">
+        select count(*) from user where username=#{userName}
+    </select>
+
+    <insert id="add" parameterType="User">
+        insert into user values(default,#{username},#{password},#{name},#{email},#{phone},#{addr},#{state},#{code})
+    </insert>
+
+    <select id="checkUser" parameterType="User" resultType="User">
+        select u_id as uId,username,password,name,email,phone,addr,state,code from user
+        where username=#{username} and password=#{password}
+    </select>
+
+    <update id="updateUser" parameterType="User">
+        update user set name=#{name},phone=#{phone},addr=#{addr},email=#{email},password=#{password} where u_id=#{uId}
+    </update>
+
+</mapper>

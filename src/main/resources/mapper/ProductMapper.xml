@@ -1,0 +1,73 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.asjy.dao.ProductMapper">
+
+    <sql id="condition">
+        <if test="cId!=null">
+            left join category_second
+            on product.cs_id = category_second.cs_id
+        </if>
+        <where>
+            <if test="csId!=null">
+                and product.cs_id=#{csId}
+            </if>
+            <if test="cId!=null">
+                and category_second.c_id=#{cId}
+            </if>
+            <if test="searchName!=null">
+                and product.p_name like "%${searchName}%"
+            </if>
+        </where>
+    </sql>
+
+    <resultMap id="productMap" type="Product">
+        <id property="pId" column="p_id"></id>
+        <result property="pName" column="p_name"></result>
+        <result property="marketPrice" column="market_price"></result>
+        <result property="shopPrice" column="shop_price"></result>
+        <result property="image" column="image"></result>
+        <result property="pDesc" column="p_desc"></result>
+        <result property="isHot" column="is_hot"></result>
+        <result property="pDate" column="p_date"></result>
+        <result property="csId" column="cs_id"></result>
+    </resultMap>
+    <select id="getProductByCsId" parameterType="Integer" resultMap="productMap">
+        select * from product where cs_id=#{cs_id}
+    </select>
+
+    <select id="getProducts" parameterType="ProductForPageBean" resultMap="productMap">
+        select product.*  from product
+        <include refid="condition"></include>
+        limit #{start},#{pageSize}
+     </select>
+
+    <select id="getRowCount" parameterType="ProductForPageBean" resultType="Integer">
+        select count(*) from product
+        <include refid="condition"></include>
+    </select>
+
+    <select id="getIsHotProducts" parameterType="ProductForPageBean" resultMap="productMap">
+            select product.*  from product
+        <if test="cId!=null">
+            left join category_second
+            on product.cs_id = category_second.cs_id
+        </if>
+        <where>
+            <if test="csId!=null">
+                and product.cs_id=#{csId}
+            </if>
+            <if test="cId!=null">
+                and category_second.c_id=#{cId}
+            </if>
+            and is_hot=1
+        </where>
+        limit 3
+    </select>
+
+    <select id="getProductById" parameterType="Integer" resultMap="productMap">
+        select * from product where p_id = #{pId}
+    </select>
+
+
+
+</mapper>
